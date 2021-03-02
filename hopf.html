@@ -2,29 +2,30 @@
 <html>
 	<head>
 		<title>Hopf Fibration</title>
-		<meta charset=utf-8>
-		<meta name=viewport content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<meta name=author content="Paul Masson">
-		<style>
-
-			body { margin: 0px; overflow: hidden; }
-
-		</style>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+		<link type="text/css" rel="stylesheet" href="main.css">
 	</head>
-
 	<body>
 
-		<script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r126/build/three.js"></script>
-		<script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r126/examples/js/controls/OrbitControls.js"></script>
+		<div id="info">
+			<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> vr - dragging
+		</div>
+
+		<script src="https://threejs.org/build/three.js"></script>
 
 		<script type="module">
 
 			import { VRButton } from 'https://threejs.org/examples/jsm/webxr/VRButton.js';
 			import { XRControllerModelFactory } from 'https://threejs.org/examples/jsm/webxr/XRControllerModelFactory.js'
+			import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitControls.js";
 
+			let container;
 			let camera, scene, renderer;
 			let controller1, controller2;
 			let controllerGrip1, controllerGrip2;
+
+			let raycaster;
 
 			const intersected = [];
 			const tempMatrix = new THREE.Matrix4();
@@ -36,29 +37,27 @@
 
 			function init(){
 
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
 				scene = new THREE.Scene();
 
-				const renderer = new THREE.WebGLRenderer( { antialias: true } );
-				renderer.setSize( window.innerWidth, window.innerHeight );
-				renderer.setClearColor( 0x000000, 1 );
-				renderer.xr.enabled = true;
-				document.body.appendChild( renderer.domElement );
-				
-				document.body.appendChild( VRButton.createButton( renderer ) );
+				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 10 );
+				camera.position.set( 0, 1.6, 3 );
+
+				controls = new OrbitControls( camera, container );
+				controls.target.set( 0, 1.6, 0 );
+				controls.update();
 
 				group = new THREE.Group();
 				scene.add( group );
-
-				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 10 );
-				camera.up.set( 1, 0, 0 );
-				camera.position.set( 0, 2, 2 );
-
-				controls = new THREE.OrbitControls( camera, renderer.domElement );
 
 				var twoPi = 2 * Math.PI;
 				var ratio = .75;
 
 				for ( var f = 0 ; f < twoPi ; f += twoPi / 60 ) {
+
+					var list = []
 
 					var a = ratio * Math.cos(f);
 					var b = ratio * Math.sin(f);
@@ -66,9 +65,6 @@
 
 					var alpha = Math.sqrt( (1+c)/2 );
 					var beta = Math.sqrt( (1-c)/2 );
-
-					var geometry = new THREE.BufferGeometry();
-					const material = new THREE.LineBasicMaterial( { color: new THREE.Color().setHSL( f / twoPi, 1, .5 ) } );
 
 					for ( var t = 0 ; t < twoPi ; t += .01 ) {
 
@@ -81,16 +77,32 @@
 
 						var r = Math.acos(w) / Math.PI / Math.sqrt( 1 - w**2 );
 
-						geometry.vertices.push( new THREE.Vector3( r*x, r*y, r*z ) );
+						list.push( new THREE.Vector3( r*x, r*y, r*z ) );
+
+						const geometry = new THREE.BufferGeometry().setFromPoints( list );
+
+						const material = new THREE.LineBasicMaterial( { color: new THREE.Color().setHSL( f / twoPi, 1, .5 ) } );
+
+						var thingy = new THREE.Line( geometry, material);
+
+						group.add(thingy);
 
 					}
 
 					
-
-					var line = new THREE.Line( geometry, material);
-
-					group.add(line);
 				}
+
+				
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.outputEncoding = THREE.sRGBEncoding;
+				renderer.shadowMap.enabled = true;
+				renderer.xr.enabled = true;
+				document.body.appendChild( renderer.domElement );
+				
+				document.body.appendChild( VRButton.createButton( renderer ) );
+
 
 
 				controller1 = renderer.xr.getController( 0 );
@@ -113,18 +125,27 @@
 				controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
 				scene.add( controllerGrip2 );
 
-				window.addEventListener( 'resize', function() {
 
-				renderer.setSize( window.innerWidth, window.innerHeight );
-				camera.aspect = window.innerWidth / window.innerHeight;
-				camera.updateProjectionMatrix();
 
-				} );
+				const geometry2 = new THREE.BufferGeometry().setFromPoints( [ new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, - 1 ) ] );
+
+				const line = new THREE.Line( geometry2 );
+				line.name = 'line';
+				line.scale.z = 5;
+
+				controller1.add( line.clone() );
+				controller2.add( line.clone() );
+
+				raycaster = new THREE.Raycaster();
+
+				
+
+				window.addEventListener( 'resize', onWindowResize );
 
 				
 			}
 
-				function onWindowResize() {
+			function onWindowResize() {
 
 				camera.aspect = window.innerWidth / window.innerHeight;
 				camera.updateProjectionMatrix();
@@ -180,7 +201,7 @@
 				return raycaster.intersectObjects( group.children );
 
 			}
-
+			
 			function intersectObjects( controller ) {
 
 				// Do not highlight when already selected
@@ -195,7 +216,7 @@
 					const intersection = intersections[ 0 ];
 
 					const object = intersection.object;
-					object.material.emissive.r = 1;
+					//object.material.emissive.r = 1;
 					intersected.push( object );
 
 					line.scale.z = intersection.distance;
@@ -207,19 +228,19 @@
 				}
 
 			}
-
+			
 			function cleanIntersected() {
 
 				while ( intersected.length ) {
 
 					const object = intersected.pop();
-					object.material.emissive.r = 0;
+					//object.material.emissive.r = 0;
 
 				}
 
 			}
 
-			
+			//
 
 			function animate() {
 
