@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Three.js Template ?</title>
+
+		<style>
+			body {margin: 0;}
+		</style>
+	</head>
+
+	<body>
+
+		<script src="js/three.js"></script>
+		<script type="module">
+
+			import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitControls.js";
+
+			let camera, controls, scene, renderer;
+
+			init();
+
+			animate()
+
+			function init() {
+
+				scene = new THREE.Scene();
+				camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
+				
+				{
+	    		const color = 0xFFFFFF;
+	    		const intensity = .7;
+	    		var light = new THREE.DirectionalLight(color, intensity);
+
+	    		var lightx = 0;
+	    		var lighty = 0;
+	    		var lightz = 1;
+
+	    		light.position.set(lightx, lighty, lightz);
+	    		scene.add(light);
+	  			}
+
+	  			scene.add(new THREE.AmbientLight('white', 0.3));
+	  			
+
+				renderer = new THREE.WebGLRenderer();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				document.body.appendChild( renderer.domElement );
+
+				controls = new OrbitControls( camera, renderer.domElement );
+				controls.listenToKeyEvents( window ); // optional
+
+				controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+				controls.dampingFactor = 0.05;
+
+				controls.screenSpacePanning = false;
+
+				controls.minDistance = 5;
+				controls.maxDistance = 500;
+
+				var segments = 100;
+				var radius = 2;
+
+	    		var list = [];
+
+
+	    		var i = 0;
+	    		var turn = ((Math.PI * 2)) / segments / 3;
+	    		var z = 0;
+
+	    		var r1 = 5;
+	    		var r2 = 3;
+	    		var r3 = 1;
+
+	    		var a = r1 - r2;
+	    		var b = r2 - r3;
+
+
+	    		for (i = 0; i <= 6 * Math.PI; i++) {
+	    			var theta = i / 100 ;
+	    			var amountturn = turn * i
+
+	    			var myvector = new THREE.Vector3(
+	           					b * Math.sin((r3 / r2) * theta) + (a * Math.sin(theta)) + (r3 * Math.sin(theta)),
+	            				(-1 * b) * Math.cos((r3 / r2) * theta) - (a * Math.cos(theta))  (r3 * Math.cos(theta)),
+	            				z);  
+
+	    			list.push(
+	        			myvector); 
+
+	        		// z += .01   
+
+	            	
+				}
+
+		    	const curve = new THREE.CatmullRomCurve3(list);
+
+				const points = curve.getPoints( 500 );
+				const geometry = new THREE.BufferGeometry().setFromPoints( points );
+	    		const material = new THREE.LineBasicMaterial({ color: 0xFFF0FF });
+
+				const myCurve = new THREE.Line(geometry, material);
+				scene.add(myCurve);
+
+				// const cubegeometry = new THREE.BoxGeometry();
+				// const cubematerial = new THREE.MeshPhongMaterial( { color: 0x00ff00 } );
+				// const cube = new THREE.Mesh( cubegeometry, cubematerial );
+				// scene.add( cube );
+				
+				camera.position.z = 5;
+
+			}
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				controls.update(); 
+				render();
+
+			}
+
+			function render() {
+
+				renderer.render( scene, camera );
+
+			}
+
+		</script>
+	</body>
+</html>

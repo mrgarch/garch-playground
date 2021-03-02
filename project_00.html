@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Three.js Template ?</title>
+
+		<style>
+			body {margin: 0;}
+		</style>
+	</head>
+
+	<body>
+		<script src="js/three.js"></script>
+
+		<script>
+			const scene = new THREE.Scene();
+			const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
+			const renderer = new THREE.WebGLRenderer();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			document.body.appendChild( renderer.domElement );
+
+			var segments = 32;
+			var radius = 2;
+			var geometry = new THREE.Geometry();
+	    	var material = new THREE.LineBasicMaterial({ color: 0xFFF0FF });
+
+	    	var i = 0
+	    	for (i = 0; i <= segments; i++) {
+	    		var theta = (i / segments) * Math.PI * 2;
+	    		geometry.vertices.push(
+	        		new THREE.Vector3(
+	           			Math.cos(theta) * radius,
+	            		Math.sin(theta) * radius,
+	            		0));            
+			}
+
+			scene.add(new THREE.Line(geometry, material));
+
+			camera.position.z = 5;
+
+
+			function animate() {
+				requestAnimationFrame( animate );
+
+				renderer.render( scene, camera );
+			}
+			animate();
+		</script>
+	</body>
+</html>

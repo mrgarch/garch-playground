@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Three.js Template ?</title>
+
+		<style>
+			body {margin: 0;}
+		</style>
+	</head>
+
+	<body>
+
+		<script src="js/three.js"></script>
+		<script type="module">
+
+			import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitControls.js";
+
+			let camera, controls, scene, renderer;
+
+			init();
+
+			animate()
+
+			function init() {
+
+				scene = new THREE.Scene();
+				camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
+				renderer = new THREE.WebGLRenderer();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				document.body.appendChild( renderer.domElement );
+
+				controls = new OrbitControls( camera, renderer.domElement );
+				controls.listenToKeyEvents( window ); // optional
+
+
+				controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+				controls.dampingFactor = 0.05;
+
+				controls.screenSpacePanning = false;
+
+				controls.minDistance = 5;
+				controls.maxDistance = 500;
+
+				controls.maxPolarAngle = Math.PI / 2;
+
+
+
+				var segments = 32;
+				var radius = 2;
+				var geometry = new THREE.Geometry();
+	    		var material = new THREE.LineBasicMaterial({ color: 0xFFF0FF });
+
+	    		var trinaglegeo = new THREE.CylinderGeometry( .5, .5, .1, 3);
+	    		var trianglemat = new THREE.MeshBasicMaterial({ color: 0x00ff00});
+	    		//var triangle = new THREE.Mesh( trinaglegeo, trianglemat );
+
+	    		var i = 0
+	    		var turn = (Math.PI * 2) / segments
+
+	    		for (i = 0; i <= segments; i++) {
+	    			var theta = (i / segments) * Math.PI * 2;
+	    			var amountturn = turn * i
+
+	    			geometry.vertices.push(
+	        			new THREE.Vector3(
+	           				Math.cos(theta) * radius,
+	            			Math.sin(theta) * radius,
+	            			0));    
+
+	            	const triangle = new THREE.Mesh( trinaglegeo, trianglemat );
+
+	            	//const tri3D = new THREE.Object3D();
+
+	            	triangle.position.x = Math.cos(theta) * radius;
+	            	triangle.position.y = Math.sin(theta) * radius;
+
+	            	//tri3D.add( triangle );
+
+	            	//tri3D.rotateX = theta;
+	            	//tri3D.rotateZ = amountturn;
+
+	            	//triangle.rotatation.x = theta;
+	            	//triangle.rotatation.z = amountturn;
+
+	            	triangle.rotateX (theta)
+	            	//triangle.rotateZ (amountturn)
+
+
+	            	scene.add(triangle);
+	            	//scene.add(tri3D)
+	            	
+
+				}
+
+				scene.add(new THREE.Line(geometry, material));
+
+				// const cubegeometry = new THREE.BoxGeometry();
+				// const cubematerial = new THREE.MeshPhongMaterial( { color: 0x00ff00 } );
+				// const cube = new THREE.Mesh( cubegeometry, cubematerial );
+				// scene.add( cube );
+				
+				camera.position.z = 5;
+
+			}
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				controls.update(); 
+				render();
+
+			}
+
+			function render() {
+
+				renderer.render( scene, camera );
+
+			}
+
+		</script>
+	</body>
+</html>

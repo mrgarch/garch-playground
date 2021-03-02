@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Three.js Template ?</title>
+
+		<style>
+			body {margin: 0;}
+		</style>
+	</head>
+
+	<body>
+
+		<script src="js/three.js"></script>
+		<script type="module">
+
+			import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitControls.js";
+
+			let camera, controls, scene, renderer;
+
+
+			//animate();
+
+			function sleep(milSecs){
+			    var date = new Date();
+			    var curDate = null;
+			    do { curDate = new Date(); }
+			    while(curDate-date < milSecs);
+			}
+
+			scene = new THREE.Scene();
+			camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
+			
+			{
+    		const color = 0xFFFFFF;
+    		const intensity = 1;
+    		var light = new THREE.DirectionalLight(color, intensity);
+
+    		var lightx = 0;
+    		var lighty = 0;
+    		var lightz = 1;
+
+    		light.position.set(lightx, lighty, lightz);
+    		scene.add(light);
+  			}
+
+  			scene.add(new THREE.AmbientLight('white', 0.7));
+  			
+
+			renderer = new THREE.WebGLRenderer();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			document.body.appendChild( renderer.domElement );
+
+			controls = new OrbitControls( camera, renderer.domElement );
+			controls.listenToKeyEvents( window ); // optional
+
+			controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+			controls.dampingFactor = 0.05;
+
+			controls.screenSpacePanning = false;
+
+			controls.minDistance = 5;
+			controls.maxDistance = 500;
+			
+			camera.position.z = 5;
+		
+
+			var update = function()
+			{
+
+			};
+
+			// draw scene
+			var render = function()
+			{
+				renderer.render(scene, camera)
+			};
+			// run game loop (update, render, repeat)
+			var GameLoop = function()
+			{
+				requestAnimationFrame(GameLoop);
+
+				update();
+				render();
+			};
+
+			//GameLoop();
+			var segments = 3600;
+			var radius = 2;
+
+	    	var boxgeo = new THREE.BoxGeometry( .01, .01, 1);
+	    	var boxmat = new THREE.MeshPhongMaterial({ color: 0x0000FF});
+
+	    	var i = 0;
+	    	var turn = Math.PI / segments;
+
+			for (i = 0; i <= segments; i++) {
+	    			var theta = (i / segments) * Math.PI * 2;
+	    			var amountturn = turn * i
+
+	    			// const clip = new THREE.AnimationClip('line', )
+
+	            	const box = new THREE.Mesh( boxgeo, boxmat );
+
+	            	box.position.x = Math.cos(theta) * radius;
+	            	box.position.y = Math.sin(theta) * radius;
+
+	            	box.rotateY (amountturn);
+	            	box.rotateZ (theta);
+
+	            	scene.add(box);
+	            	sleep(1);
+	            	render();
+	            	console.log("line drawn?");
+	        }
+		
+
+		</script>
+	</body>
+</html>

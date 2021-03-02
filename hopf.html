@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Hopf Fibration</title>
+		<meta charset=utf-8>
+		<meta name=viewport content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<meta name=author content="Paul Masson">
+		<style>
+
+			body { margin: 0px; overflow: hidden; }
+
+		</style>
+	</head>
+
+	<body>
+
+		<script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r100/build/three.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r100/examples/js/controls/OrbitControls.js"></script>
+
+		<script type="module">
+
+			import { VRButton } from 'https://threejs.org/examples/jsm/webxr/VRButton.js';
+			import { XRControllerModelFactory } from 'https://threejs.org/examples/jsm/webxr/XRControllerModelFactory.js'
+
+			let camera, scene, renderer;
+			let controller1, controller2;
+			let controllerGrip1, controllerGrip2;
+
+			const intersected = [];
+			const tempMatrix = new THREE.Matrix4();
+
+			let controls, group;
+
+			init();
+			animate();
+
+			function init(){
+
+				scene = new THREE.Scene();
+
+				const renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.setClearColor( 0x000000, 1 );
+				renderer.xr.enabled = true;
+				document.body.appendChild( renderer.domElement );
+				
+				document.body.appendChild( VRButton.createButton( renderer ) );
+
+				group = new THREE.Group();
+				scene.add( group );
+
+				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 10 );
+				camera.up.set( 1, 0, 0 );
+				camera.position.set( 0, 2, 2 );
+
+				controls = new THREE.OrbitControls( camera, renderer.domElement );
+
+				var twoPi = 2 * Math.PI;
+				var ratio = .75;
+
+				for ( var f = 0 ; f < twoPi ; f += twoPi / 60 ) {
+
+					var a = ratio * Math.cos(f);
+					var b = ratio * Math.sin(f);
+					var c = Math.sqrt( 1 - a**2 - b**2 );
+
+					var alpha = Math.sqrt( (1+c)/2 );
+					var beta = Math.sqrt( (1-c)/2 );
+
+					var geometry = new THREE.Geometry();
+					const material = new THREE.LineBasicMaterial( { color: new THREE.Color().setHSL( f / twoPi, 1, .5 ) } );
+
+					for ( var t = 0 ; t < twoPi ; t += .01 ) {
+
+						var theta = Math.atan2( b, -a ) - t;
+
+						var w = alpha * Math.cos(theta);
+						var x = alpha * Math.sin(theta);
+						var y = beta * Math.cos(t);
+						var z = beta * Math.sin(t);
+
+						var r = Math.acos(w) / Math.PI / Math.sqrt( 1 - w**2 );
+
+						geometry.vertices.push( new THREE.Vector3( r*x, r*y, r*z ) );
+
+					}
+
+					
+
+					var line = new THREE.Line( geometry, material);
+
+					group.add(line);
+				}
+
+
+				controller1 = renderer.xr.getController( 0 );
+				controller1.addEventListener( 'selectstart', onSelectStart );
+				controller1.addEventListener( 'selectend', onSelectEnd );
+				scene.add( controller1 );
+
+				controller2 = renderer.xr.getController( 1 );
+				controller2.addEventListener( 'selectstart', onSelectStart );
+				controller2.addEventListener( 'selectend', onSelectEnd );
+				scene.add( controller2 );
+
+				const controllerModelFactory = new XRControllerModelFactory();
+
+				controllerGrip1 = renderer.xr.getControllerGrip( 0 );
+				controllerGrip1.add( controllerModelFactory.createControllerModel( controllerGrip1 ) );
+				scene.add( controllerGrip1 );
+
+				controllerGrip2 = renderer.xr.getControllerGrip( 1 );
+				controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
+				scene.add( controllerGrip2 );
+
+				window.addEventListener( 'resize', function() {
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				} );
+
+				
+			}
+
+				function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			function onSelectStart( event ) {
+
+				const controller = event.target;
+
+				const intersections = getIntersections( controller );
+
+				if ( intersections.length > 0 ) {
+
+					const intersection = intersections[ 0 ];
+
+					const object = intersection.object;
+					object.material.emissive.b = 1;
+					controller.attach( object );
+
+					controller.userData.selected = object;
+
+				}
+
+			}
+
+			function onSelectEnd( event ) {
+
+				const controller = event.target;
+
+				if ( controller.userData.selected !== undefined ) {
+
+					const object = controller.userData.selected;
+					object.material.emissive.b = 0;
+					group.attach( object );
+
+					controller.userData.selected = undefined;
+
+				}
+
+
+			}
+
+			function getIntersections( controller ) {
+
+				tempMatrix.identity().extractRotation( controller.matrixWorld );
+
+				raycaster.ray.origin.setFromMatrixPosition( controller.matrixWorld );
+				raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( tempMatrix );
+
+				return raycaster.intersectObjects( group.children );
+
+			}
+
+			function intersectObjects( controller ) {
+
+				// Do not highlight when already selected
+
+				if ( controller.userData.selected !== undefined ) return;
+
+				const line = controller.getObjectByName( 'line' );
+				const intersections = getIntersections( controller );
+
+				if ( intersections.length > 0 ) {
+
+					const intersection = intersections[ 0 ];
+
+					const object = intersection.object;
+					object.material.emissive.r = 1;
+					intersected.push( object );
+
+					line.scale.z = intersection.distance;
+
+				} else {
+
+					line.scale.z = 5;
+
+				}
+
+			}
+
+			function cleanIntersected() {
+
+				while ( intersected.length ) {
+
+					const object = intersected.pop();
+					object.material.emissive.r = 0;
+
+				}
+
+			}
+
+			
+
+			function animate() {
+
+				renderer.setAnimationLoop( render );
+
+			}
+
+			function render() {
+
+				cleanIntersected();
+
+				intersectObjects( controller1 );
+				intersectObjects( controller2 );
+
+				renderer.render( scene, camera );
+
+			}
+
+		</script>
+	</body>
+</html>
