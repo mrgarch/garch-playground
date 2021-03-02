@@ -67,7 +67,7 @@
 					var alpha = Math.sqrt( (1+c)/2 );
 					var beta = Math.sqrt( (1-c)/2 );
 
-					var geometry = new THREE.Geometry();
+					var geometry = new THREE.BufferGeometry();
 					const material = new THREE.LineBasicMaterial( { color: new THREE.Color().setHSL( f / twoPi, 1, .5 ) } );
 
 					for ( var t = 0 ; t < twoPi ; t += .01 ) {
