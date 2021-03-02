@@ -50,16 +50,7 @@
 				controls.target.set( 0, 1.6, 0 );
 				controls.update();
 
-				const floorGeometry = new THREE.PlaneGeometry( 4, 4 );
-				const floorMaterial = new THREE.MeshStandardMaterial( {
-					color: 0xeeeeee,
-					roughness: 1.0,
-					metalness: 0.0
-				} );
-				const floor = new THREE.Mesh( floorGeometry, floorMaterial );
-				floor.rotation.x = - Math.PI / 2;
-				floor.receiveShadow = true;
-				scene.add( floor );
+				
 
 				scene.add( new THREE.HemisphereLight( 0x808080, 0x606060 ) );
 
@@ -76,42 +67,35 @@
 				group = new THREE.Group();
 				scene.add( group );
 
-				const geometries = [
-					new THREE.BoxGeometry( 0.2, 0.2, 0.2 ),
-					new THREE.ConeGeometry( 0.2, 0.2, 64 ),
-					new THREE.CylinderGeometry( 0.2, 0.2, 0.2, 64 ),
-					new THREE.IcosahedronGeometry( 0.2, 8 ),
-					new THREE.TorusGeometry( 0.2, 0.04, 64, 32 )
-				];
+				var segments = 3600;
+				var radius = 2;
 
-				for ( let i = 0; i < 50; i ++ ) {
+	    		var boxgeo = new THREE.BoxGeometry( .01, .01, 1);
+	    		var boxmat = new THREE.MeshPhongMaterial({ color: 0x0000FF});
+	    		//var triangle = new THREE.Mesh( trinaglegeo, trianglemat );
 
-					const geometry = geometries[ Math.floor( Math.random() * geometries.length ) ];
-					const material = new THREE.MeshStandardMaterial( {
-						color: Math.random() * 0xffffff,
-						roughness: 0.7,
-						metalness: 0.0
-					} );
+	    		var i = 0;
+	    		var turn = Math.PI / segments;
 
-					const object = new THREE.Mesh( geometry, material );
+	    		for (i = 0; i <= segments; i++) {
+	    			var theta = (i / segments) * Math.PI * 2;
+	    			var amountturn = turn * i
 
-					object.position.x = Math.random() * 4 - 2;
-					object.position.y = Math.random() * 2;
-					object.position.z = Math.random() * 4 - 2;
+	    			// const clip = new THREE.AnimationClip('line', )
 
-					object.rotation.x = Math.random() * 2 * Math.PI;
-					object.rotation.y = Math.random() * 2 * Math.PI;
-					object.rotation.z = Math.random() * 2 * Math.PI;
+	            	const box = new THREE.Mesh( boxgeo, boxmat );
 
-					object.scale.setScalar( Math.random() + 0.5 );
+	            	box.position.x = Math.cos(theta) * radius;
+	            	box.position.y = Math.sin(theta) * radius;
 
-					object.castShadow = true;
-					object.receiveShadow = true;
 
-					group.add( object );
+	            	box.rotateY (amountturn)
+	            	box.rotateZ (theta)
 
-				}
+	            	group.add(box);
+	            }
 
+				
 				//
 
 				renderer = new THREE.WebGLRenderer( { antialias: true } );
