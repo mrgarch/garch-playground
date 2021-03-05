@@ -60,9 +60,10 @@
 				//controls.maxDistance = 500;
 
 				var segments = 7;
-				var radius = 2;
+				var radius = 1;
 
 	    		var list = [];
+	    		var list2 =[]
 
 
 
@@ -71,7 +72,7 @@
 
 	    		var i = 0;
 	    		var j = 0;
-	    		for (j = -1; j <= 1; j = j + .001) {
+	    		for (j = -1; j <= -.333; j = j + .001) {
 	    			for (i = 0; i <= segments; i = i + .1) {
 		    			var myvector = new THREE.Vector3(
 		           			Math.cos(i) * (radius + ((j / 2) *  Math.cos(i / 2))),
@@ -79,6 +80,19 @@
 		            		(j / 2) *  Math.sin(i / 2));  
 
 		    			list.push(
+		        			myvector);    
+	            	}
+				}
+				var i = 0;
+	    		var j = 0;
+				for (j = 1; j <= .333; j = j + .001) {
+	    			for (i = 0; i <= segments; i = i + .1) {
+		    			var myvector = new THREE.Vector3(
+		           			Math.cos(i) * (radius + ((j / 2) *  Math.cos(i / 2))),
+		            		Math.sin(i) * (radius + ((j / 2) *  Math.sin(i / 2))),
+		            		(j / 2) *  Math.sin(i / 2));  
+
+		    			list2.push(
 		        			myvector);    
 	            	}
 				}
@@ -95,10 +109,16 @@
 
 				//const points = curve.getPoints( 500 );
 				const geometry = new THREE.BufferGeometry().setFromPoints( list );
-	    		const material = new THREE.LineBasicMaterial({ color: 0xFF0000 });
+	    		const material = new THREE.LineBasicMaterial({ color: 0xFFF0FF });
 
 				const myCurve = new THREE.Line(geometry, material);
 				scene.add(myCurve);
+
+				const geometry2 = new THREE.BufferGeometry().setFromPoints( list2 );
+	    		const material2 = new THREE.LineBasicMaterial({ color: 0xFFF0FF });
+
+				const myCurve2 = new THREE.Line(geometry2, material2);
+				scene.add(myCurve2);
 
 				camera.position.z = 5;
 

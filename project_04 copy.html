@@ -60,7 +60,7 @@
 				//controls.maxDistance = 500;
 
 				var segments = 7;
-				var radius = 2;
+				var radius = 1;
 
 	    		var list = [];
 
@@ -95,7 +95,7 @@
 
 				//const points = curve.getPoints( 500 );
 				const geometry = new THREE.BufferGeometry().setFromPoints( list );
-	    		const material = new THREE.LineBasicMaterial({ color: 0xFF0000 });
+	    		const material = new THREE.LineBasicMaterial({ color: 0xFFF0FF });
 
 				const myCurve = new THREE.Line(geometry, material);
 				scene.add(myCurve);
