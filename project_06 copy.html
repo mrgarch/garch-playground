@@ -21,6 +21,13 @@
 			init();
 
 			animate()
+			
+			function sleep(milSecs){
+			    var date = new Date();
+			    var curDate = null;
+			    do { curDate = new Date(); }
+			    while(curDate-date < milSecs);
+			}
 
 			function init() {
 
@@ -30,7 +37,7 @@
 				
 				{
 	    		const color = 0xFFFFFF;
-	    		const intensity = .7;
+	    		const intensity = 1;
 	    		var light = new THREE.DirectionalLight(color, intensity);
 
 	    		var lightx = 0;
@@ -41,7 +48,7 @@
 	    		scene.add(light);
 	  			}
 
-	  			scene.add(new THREE.AmbientLight('white', 0.3));
+	  			scene.add(new THREE.AmbientLight('white', 0.7));
 	  			
 
 				renderer = new THREE.WebGLRenderer();
@@ -56,50 +63,40 @@
 
 				controls.screenSpacePanning = false;
 
-				//controls.minDistance = 1;
-				//controls.maxDistance = 500;
-
-				var segments = Math.PI * 2;
-				var radius = 1;
-
-	    		var list = [];
+				controls.minDistance = 5;
+				controls.maxDistance = 500;
 
 
+				var segments = 3600;
+				var radius = 2;
 
-	    		// var trinaglegeo = new THREE.CylinderGeometry( .5, .5, .1, 3);
-	    		// var trianglemat = new THREE.MeshPhongMaterial({ color: 0x00ff00});
+	    		var boxgeo = new THREE.BoxGeometry( .01, .01, 1);
+	    		var boxmat = new THREE.MeshPhongMaterial({ color: 0x0000FF});
+	    		//var triangle = new THREE.Mesh( trinaglegeo, trianglemat );
 
 	    		var i = 0;
-	    		var j = 0;
-	    		for (j = -1; j <= 1; j = j + .001) {
-	    			for (i = 0; i <= segments; i = i + .1) {
-		    			var myvector = new THREE.Vector3(
-		           			Math.cos(i) * (radius + ((j / 2) *  Math.sin(i / 2))),
-		            		Math.sin(i) * (radius + ((j / 2) *  Math.sin(i / 2))),
-		            		(j / 2) *  Math.sin(i / 2));  
+	    		var turn = Math.PI / segments;
 
-		    			list.push(
-		        			myvector);    
-	            	}
+	    		for (i = 0; i <= segments; i++) {
+	    			var theta = (i / segments) * Math.PI * 2;
+	    			var amountturn = turn * i
+
+	    			// const clip = new THREE.AnimationClip('line', )
+
+	            	const box = new THREE.Mesh( boxgeo, boxmat );
+
+	            	box.position.x = Math.cos(theta) * radius;
+	            	box.position.y = Math.sin(theta) * radius;
+
+
+	            	box.rotateY (amountturn)
+	            	box.rotateZ (theta)
+
+	            	scene.add(box);
+
 				}
-				/*
-				const geometry = new THREE.BufferGeometry().setFromPoints( list );
-	    		var material = new THREE.LineBasicMaterial({ color: 0xFFF0FF });
 
-				const line = new THREE.Line(geometry, material);
-				scene.add(line);
 				
-				camera.position.z = 5;
-				*/
-				//const curve = new THREE.Line(list);
-
-				//const points = curve.getPoints( 500 );
-				const geometry = new THREE.BufferGeometry().setFromPoints( list );
-	    		const material = new THREE.LineBasicMaterial({ color: 0xFFF0FF });
-
-				const myCurve = new THREE.Line(geometry, material);
-				scene.add(myCurve);
-
 				camera.position.z = 5;
 
 			}
