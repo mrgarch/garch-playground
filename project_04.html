@@ -74,7 +74,7 @@
 	    		for (j = -1; j <= 1; j = j + .001) {
 	    			for (i = 0; i <= segments; i = i + .1) {
 		    			var myvector = new THREE.Vector3(
-		           			Math.cos(i) * (radius + ((j / 2) *  Math.sin(i / 2))),
+		           			Math.cos(i) * (radius + ((j / 2) *  Math.cos(i / 2))),
 		            		Math.sin(i) * (radius + ((j / 2) *  Math.sin(i / 2))),
 		            		(j / 2) *  Math.sin(i / 2));  
 
