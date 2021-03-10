@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Three.js Template ?</title>
+
+		<style>
+			body {margin: 0;}
+		</style>
+	</head>
+
+	<body>
+
+		<script src="js/three.js"></script>
+		<script type="module">
+
+			import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitControls.js";
+			import { ParametricGeometries } from "https://threejs.org/examples/jsm/geometries/ParametricGeometries.js";
+			// import {}
+
+			let camera, controls, scene, renderer;
+
+			init();
+
+			animate()
+
+			function init() {
+
+				scene = new THREE.Scene();
+				camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
+				
+				{
+	    		const color = 0xFFFFFF;
+	    		const intensity = .7;
+	    		var light = new THREE.DirectionalLight(color, intensity);
+
+	    		var lightx = 0;
+	    		var lighty = 0;
+	    		var lightz = 1;
+
+	    		light.position.set(lightx, lighty, lightz);
+	    		scene.add(light);
+	  			}
+
+	  			scene.add(new THREE.AmbientLight('white', 0.3));
+	  			
+
+				renderer = new THREE.WebGLRenderer();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				document.body.appendChild( renderer.domElement );
+
+				controls = new OrbitControls( camera, renderer.domElement );
+				controls.listenToKeyEvents( window ); // optional
+
+				controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+				controls.dampingFactor = 0.05;
+
+				controls.screenSpacePanning = false;
+
+				//controls.minDistance = 1;
+				//controls.maxDistance = 500;
+				const geometry = new THREE.ParametricGeometry( THREE.ParametricGeometries.klein, 25, 25 );
+				material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+				klein = new THREE.Mesh( geometry, material );
+				scene.add( klein );
+
+			}
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				controls.update(); 
+				render();
+
+			}
+
+			function render() {
+
+				renderer.render( scene, camera );
+
+			}
+
+		</script>
+	</body>
+</html>
